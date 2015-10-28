@@ -4,32 +4,66 @@ var viewport = $( "#viewport" );
 var viewimg = $( "#viewimg" );
 var canvas = viewimg[0];
 var photoIndex = -1;
-var photoData;
+var rotation = 0;
 var photoImg = new Image();
 
 
-function onDataLoaded() {
-	//ctx.drawImage(photoImg, -img.width/2, -img.height/2);
-	canvas.width = photoImg.width;
-	canvas.height = photoImg.height;
-	var ctx = canvas.getContext("2d");
-	ctx.drawImage( photoImg, 0, 0 );
-}
-
-
 function setPhotoData( data ) {
-	photoData = data;
-	photoImg.onload = onDataLoaded;
-	photoImg.src = photoData;	
-	//viewimg.attr( "src", data );
+	photoImg.onload = function() {		
+		var flipHorz = false;
+		var flipVert = false;
+		var imgRotation = 0;
+		switch ( data.orientation ) {
+			case 2:
+				flipHorz = true;
+				break;
+			case 3: // upside down
+				imgRotation = 2;
+				break;
+			case 4:
+				imgRotation = 2;
+				flipHorz = true;
+				break;
+			case 5:
+				imgRotation = 1;  // 90* anticlockwise
+				flipVert = true;
+				break;
+			case 6:
+				imgRotation = 1;
+				break;
+			case 7:
+				imgRotation = 3; // 90* clockwise - needs to be rotated 270* to correct
+				flipVert = true;
+				break;
+			case 8:
+				imgRotation = 3;
+				break;
+		}
+		var sideways = ( imgRotation % 2 ) === 1;
+		canvas.height = sideways ? photoImg.width : photoImg.height;
+		canvas.width = sideways ? photoImg.height : photoImg.width;
+		
+		var ctx = canvas.getContext("2d");
+		ctx.save();
+		ctx.translate(canvas.width/2, canvas.height/2);
+		if ( flipHorz || flipVert ) {
+			ctx.scale( flipHorz ? -1 : 1, flipVert ? -1 : 1 );
+		}
+		if ( imgRotation > 0 ) {
+			ctx.rotate( imgRotation * ( Math.PI / 2 ) );
+		}
+		ctx.drawImage(photoImg, -photoImg.width/2, -photoImg.height/2);
+		ctx.restore();
+	};
+	photoImg.src = data.data;
 }
 
 
 function loadNextPhoto() {
 	var previousPhotoData;
 	var nextIndex = photoIndex + 1;
-	$.getJSON( '/next', { index: nextIndex, previous: { index: photoIndex, data: previousPhotoData } }, function( data ) {
-		setPhotoData( data.data );
+	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotation: rotation } }, function( data ) {
+		setPhotoData( data );
 		photoIndex = nextIndex;
 	} );
 }
@@ -41,26 +75,19 @@ function set_body_height() { // set body height = window height
 
 
 function rotate( clockwise ) {
-
-	canvas.height = img.width;
-	canvas.width = img.height;
+	rotation++;
+	if ( rotation > 3 ) {
+		rotation = 0;
+	}
+	var sideways = ( rotation % 2 ) === 1;
+	canvas.height = sideways ? photoImg.width : photoImg.height;
+	canvas.width = sideways ? photoImg.height : photoImg.width;
 	var ctx = canvas.getContext("2d");	
 	ctx.save();
 	ctx.translate(canvas.width/2, canvas.height/2);
-	ctx.rotate(90 * Math.PI / 180);
-	ctx.drawImage(img, -img.width/2, -img.height/2);
+	ctx.rotate( rotation * ( Math.PI / 2 ) );
+	ctx.drawImage(photoImg, -photoImg.width/2, -photoImg.height/2);
 	ctx.restore();
-	
-		// var canvas = document.createElement("canvas");
-		// canvas.height = img.width;
-		// canvas.width = img.height;
-		// var ctx = canvas.getContext("2d");
-		// ctx.translate(canvas.width/2, canvas.height/2);
-		// //..check orientation data, this code assumes the case where its oriented 90 degrees off
-		// ctx.rotate(90 * Math.PI / 180);
-		// ctx.drawImage(img, -img.width/2, -img.height/2);
-		// setPhotoData( canvas.toDataURL("image/jpeg") );
-	
 }
 
 
