@@ -27,8 +27,9 @@ function bufferToBase64( format, data ) {
 
 function doSharp( imageFilename, callback ) {
 	console.log( "Using sharp for image conversion..." );
+	var newHeight;
 	sharp( imageFilename )
-		.metadata( function( data ) {
+		.metadata( function( err, data ) {
 			var ratio = data.width / data.height;
 			newHeight = ratio * newWidth;
 		} )
