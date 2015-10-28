@@ -3,7 +3,7 @@
 var fs = require( 'fs' );
 var path = require( 'path' );
 var express = require('express');
-var sharp = require('sharp');
+var convertImage = require('./convertImage.js');
 
 var newWidth = 300;
 
@@ -19,33 +19,12 @@ function onNextRequest( req, res ) {
 	var files = fs.readdirSync( photoDir );
 	var nextFilePath = path.join( photoDir, files[ reqIndex ] );
 
-	var newHeight; 
-	sharp('input.jpg')
-		.metadata( function( data ) {
-			var ratio = data.width / data.height;
-			newHeight = ratio * newWidth;
-		} )
-		.resize(newWidth, newHeight)
-		.webp()
-		.toBuffer()
-		.then( function( data ) {
-			// var type = path.extname( nextFilePath );
-			// if ( type[0] === '.' ) {
-				// type = type.substr( 1 );
-			// }
-			var type = "webp";
-			var prefix = "data:image/" + type + ";base64,";
-			var base64 = data.toString('base64');
-			var photoData = prefix + base64;
-			
-			var responseData = {
-				index: reqIndex,
-				data: photoData
-			};
-			
-			res.send( JSON.stringify( responseData ) );
-			res.end();
-		} );
+	convertImage( nextFilePath, function( err, str ) {
+		res.send( JSON.stringify( {
+			index: reqIndex,
+			data: str
+		} ) );
+	} );
 }
 
 

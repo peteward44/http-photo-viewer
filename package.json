@@ -9,6 +9,10 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.13.3"
+    "express": "^4.13.3",
+    "jimp": "^0.2.9"
+  },
+  "optionalDependencies": {
+	"sharp": "^0.11.3"
   }
 }
