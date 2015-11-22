@@ -13,8 +13,13 @@ let g_files = new Files();
 
 function rotateAndSave( index, rotation ) {
 	var p = g_files.getImage( index );
-	convertImage.rotate( p.path, { rotation: rotation }, function( err, data ) {
-		fs.writeFile( p, data, 'binary', function() {
+	convertImage.rotate( p.path, { rotation: rotation, writeExif: true }, function( err, data, newOrientation ) {
+		g_files.updateOrientation( p.path, newOrientation );
+		let newp = p.path;
+		// let ext = path.extname( p.path );
+		// let fileNoExt = path.basename( p.path, ext );
+		// let newp = path.join( path.dirname( p.path ), fileNoExt + ".new" + ext );
+		fs.writeFile( newp, data, 'binary', function() {
 			console.log( "Written image " + p );
 		} );
 	} );
@@ -28,14 +33,14 @@ function onNextRequest( req, res ) {
 	if ( req.query.previous && req.query.previous.rotation !== undefined ) {
 		var rot = parseInt( req.query.previous.rotation, 10 );
 		if ( rot !== 0 ) {
-		//	rotateAndSave( req.query.previous.index, rot );
+			rotateAndSave( req.query.previous.index, rot );
 		}
 	}
 	
 	// then load next image
 	var reqIndex = req.query.next.index;
 	let image = g_files.getImage( reqIndex );
-	convertImage.clientView( image.path, {}, function( err, str ) {
+	convertImage.clientView( image.path, { noConvert: true }, function( err, str ) {
 		console.log( image );
 		res.send( JSON.stringify( {
 			index: reqIndex,
