@@ -92,7 +92,7 @@ export function clientView( imageFilename, options, callback ) {
 			doJimp( imageFilename, options, callback );
 		}
 	}
-};
+}
 
 
 
@@ -255,6 +255,7 @@ export function rotate( imageFilename, options, callback ) {
 		exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] = newOrientation;
 		let exifBytes = piexifjs.dump( exif );
 		let newdata = piexifjs.insert( exifBytes, data );
+	//	console.log( "Outputting exif data " + imageFilename + ".exif" );
 	//	fs.writeFileSync( imageFilename + ".exif", JSON.stringify( exif, null, 2 ) );
 		callback( null, newdata, newOrientation );
 	} else {

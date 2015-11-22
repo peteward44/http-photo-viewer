@@ -3,7 +3,7 @@
 var viewport = $( "#viewport" );
 var viewimg = $( "#viewimg" );
 var canvas = viewimg[0];
-var photoIndex = -1;
+var photoIndex = 0;
 var rotation = 0;
 var rotationChange = 0;
 var photoImg = new Image();
@@ -65,9 +65,12 @@ function setPhotoData( data ) {
 }
 
 
-function loadNextPhoto() {
+function loadNextPhoto( next ) {
 	var previousPhotoData;
-	var nextIndex = photoIndex + 1;
+	var nextIndex = 0;
+	if ( next !== undefined ) {
+		nextIndex = photoIndex + ( next ? 1 : -1 );
+	}
 	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotation: rotationChange } }, function( data ) {
 		setPhotoData( data );
 		photoIndex = nextIndex;
@@ -80,15 +83,22 @@ function set_body_height() { // set body height = window height
 }
 
 
+function inc( base, diff ) {
+	base += diff;
+	if ( base > 3 ) {
+		base = 0;
+	}
+	if ( base < 0 ) {
+		base = 3;
+	}
+	return base;
+}
+
+
 function rotate( clockwise ) {
-	rotation++;
-	rotationChange++;
-	if ( rotation > 3 ) {
-		rotation = 0;
-	}
-	if ( rotationChange > 3 ) {
-		rotationChange = 0;
-	}
+	var diff = clockwise ? 1 : -1;
+	rotation = inc( rotation, diff );
+	rotationChange = inc( rotationChange, diff );
 	render();
 }
 
@@ -97,10 +107,10 @@ function onKeyPress( evt ) {
 	console.log( evt.which );
 	switch ( evt.which ) {
 		case 37: // left
-			loadNextPhoto();
+			loadNextPhoto( false );
 			break;
 		case 39: // right
-			loadNextPhoto();
+			loadNextPhoto( true );
 			break;
 		case 40: // down
 			rotate( true );

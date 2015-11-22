@@ -33,12 +33,12 @@ function onNextRequest( req, res ) {
 	if ( req.query.previous && req.query.previous.rotation !== undefined ) {
 		var rot = parseInt( req.query.previous.rotation, 10 );
 		if ( rot !== 0 ) {
-			rotateAndSave( req.query.previous.index, rot );
+			rotateAndSave( parseInt( req.query.previous.index, 10 ), rot );
 		}
 	}
 	
 	// then load next image
-	var reqIndex = req.query.next.index;
+	var reqIndex = parseInt( req.query.next.index, 10 );
 	let image = g_files.getImage( reqIndex );
 	convertImage.clientView( image.path, { noConvert: true }, function( err, str ) {
 		console.log( image );

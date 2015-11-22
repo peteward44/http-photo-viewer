@@ -58,7 +58,14 @@ export default class Files {
 	
 	
 	getImage( index ) {
-		return this._files[ index ];
+		if ( this._files.length > 0 ) {
+			while ( index < 0 ) {
+				console.log( index );
+				index += this._files.length;
+			}
+			return this._files[ index % this._files.length ];
+		}
+		return null;
 	}
 }
 
