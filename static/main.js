@@ -2,6 +2,7 @@
 
 var viewport = $( "#viewport" );
 var viewimg = $( "#viewimg" );
+var filenameDiv = $( "#filename" );
 var canvas = viewimg[0];
 var photoIndex = 0;
 var rotation = 0;
@@ -65,6 +66,11 @@ function setPhotoData( data ) {
 }
 
 
+function setFilename( data ) {
+	filenameDiv[0].innerHTML = data.path;
+}
+
+
 function loadNextPhoto( next ) {
 	var previousPhotoData;
 	var nextIndex = 0;
@@ -73,6 +79,7 @@ function loadNextPhoto( next ) {
 	}
 	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotation: rotationChange } }, function( data ) {
 		setPhotoData( data );
+		setFilename( data );
 		photoIndex = nextIndex;
 	} );
 }
@@ -103,8 +110,13 @@ function rotate( clockwise ) {
 }
 
 
+function deletePicture() {
+
+}
+
+
 function onKeyPress( evt ) {
-	console.log( evt.which );
+	//console.log( evt.which );
 	switch ( evt.which ) {
 		case 37: // left
 			loadNextPhoto( false );
@@ -118,6 +130,9 @@ function onKeyPress( evt ) {
 		case 38: // up
 			rotate( false );
 			break;
+		case 123: // enter
+			deletePicture();
+			break;
 	}
 }
 
@@ -127,5 +142,6 @@ window.onload = function() {
 	win.bind('resize', set_body_height);
 	win.keydown( onKeyPress );
 	loadNextPhoto();
+	set_body_height();
 };
 

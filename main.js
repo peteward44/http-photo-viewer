@@ -44,6 +44,7 @@ function onNextRequest( req, res ) {
 		console.log( image );
 		res.send( JSON.stringify( {
 			index: reqIndex,
+			path: image.path,
 			data: str,
 			orientation: image.orientation
 		} ) );

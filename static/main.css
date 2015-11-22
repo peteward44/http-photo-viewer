@@ -18,6 +18,24 @@ body, html {
 {
 	max-width: 99%;
 	max-height: 99%;
+	z-index: 0;
 }
 
+.filename
+{
+	margin: 2px;
+	border-style: solid;
+	border-width: 2px;
+	border-color: red;
+	z-index: 100;
+	position: relative;
+	background-color: #FFFFFF;
+	width: auto;
+}
+
+.viewport
+{
+	position: relative;
+	top: 0; bottom: 0; left: 0; right: 0
+}
 
