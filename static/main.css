@@ -21,7 +21,7 @@ body, html {
 	z-index: 0;
 }
 
-.filename
+filename
 {
 	margin: 2px;
 	border-style: solid;
@@ -33,9 +33,19 @@ body, html {
 	width: auto;
 }
 
-.viewport
+viewport
 {
 	position: relative;
 	top: 0; bottom: 0; left: 0; right: 0
+}
+
+dialog-confirm
+{
+	display: none;
+}
+
+dialog-loading
+{
+	display: none;
 }
 

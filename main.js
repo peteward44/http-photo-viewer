@@ -30,10 +30,15 @@ function onNextRequest( req, res ) {
 	//console.log( "req", req.query );
 	
 	// save previous image if modified
-	if ( req.query.previous && req.query.previous.rotation !== undefined ) {
-		var rot = parseInt( req.query.previous.rotation, 10 );
-		if ( rot !== 0 ) {
-			rotateAndSave( parseInt( req.query.previous.index, 10 ), rot );
+	if ( req.query.previous ) {
+		let index = parseInt( req.query.previous.index, 10 );
+		if ( Boolean( req.query.previous.deleted ) === true ) {
+			console.log( "Deleted", index );
+		} else if ( req.query.previous.rotation !== undefined ) {
+			var rot = parseInt( req.query.previous.rotation, 10 );
+			if ( rot !== 0 ) {
+				rotateAndSave( index, rot );
+			}
 		}
 	}
 	

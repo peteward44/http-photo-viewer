@@ -10,6 +10,7 @@ var rotationChange = 0;
 var photoImg = new Image();
 var flipHorz = false;
 var flipVert = false;
+var modalOn = false;
 
 
 function render() {
@@ -25,6 +26,7 @@ function render() {
 	ctx.rotate( rotation * ( Math.PI / 2 ) );
 	ctx.drawImage(photoImg, -photoImg.width/2, -photoImg.height/2);
 	ctx.restore();
+	viewimg.show();
 }
 
 
@@ -61,6 +63,7 @@ function setPhotoData( data ) {
 				break;
 		}
 		render();
+		$( "#dialog-loading" ).dialog( "close" );
 	};
 	photoImg.src = data.data;
 }
@@ -71,16 +74,33 @@ function setFilename( data ) {
 }
 
 
-function loadNextPhoto( next ) {
+function loadNextPhoto( next, deleted ) {
 	var previousPhotoData;
 	var nextIndex = 0;
 	if ( next !== undefined ) {
 		nextIndex = photoIndex + ( next ? 1 : -1 );
 	}
-	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotation: rotationChange } }, function( data ) {
+	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotation: rotationChange, deleted: deleted } }, function( data ) {
 		setPhotoData( data );
 		setFilename( data );
 		photoIndex = nextIndex;
+	} );
+	viewimg.hide();
+	// var ctx = canvas.getContext( "2d" );
+	// ctx.save();
+	// ctx.fillStyle = "#C4C4C4";
+	// ctx.fillRect( 0, 0, canvas.width, canvas.height );
+	// ctx.restore();
+	
+	$( "#dialog-loading" ).dialog( {
+		closeOnEscape: false,
+		height: 95,
+		open: function(event, ui) {
+			$(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+			$( "#progressbar" ).progressbar({
+				value: false
+			});
+		}
 	} );
 }
 
@@ -111,36 +131,57 @@ function rotate( clockwise ) {
 
 
 function deletePicture() {
-
+	modalOn = true;
+	$( "#dialog-confirm" ).dialog({
+		resizable: false,
+		height: 200,
+		modal: true,
+		buttons: {
+			"Delete picture": function() {
+				modalOn = false;
+				loadNextPhoto( true, true );
+				$( this ).dialog( "close" );
+			},
+			Cancel: function() {
+				modalOn = false;
+				$( this ).dialog( "close" );
+			}
+		}
+	});
 }
 
 
 function onKeyPress( evt ) {
-	//console.log( evt.which );
-	switch ( evt.which ) {
-		case 37: // left
-			loadNextPhoto( false );
-			break;
-		case 39: // right
-			loadNextPhoto( true );
-			break;
-		case 40: // down
-			rotate( true );
-			break;
-		case 38: // up
-			rotate( false );
-			break;
-		case 123: // enter
-			deletePicture();
-			break;
+	console.log( evt.which );
+	if ( !modalOn ) {
+		// key presses only allowed when a modal dialog is not displayed
+		switch ( evt.which ) {
+			case 37: // left
+				loadNextPhoto( false );
+				break;
+			case 13: // enter
+			case 39: // right
+				loadNextPhoto( true );
+				break;
+			case 40: // down
+				rotate( true );
+				break;
+			case 38: // up
+				rotate( false );
+				break;
+			case 46: // delete
+				deletePicture();
+				break;
+		}
 	}
+	return true;
 }
 
 
 window.onload = function() {
 	var win = $(window);
 	win.bind('resize', set_body_height);
-	win.keydown( onKeyPress );
+	win.keydown( onKeyPress );	
 	loadNextPhoto();
 	set_body_height();
 };
