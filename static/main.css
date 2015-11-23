@@ -1,50 +1,46 @@
 
 body, html {
 	height: 95%;
-	padding: 5px;
 	font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
 	font-size: 80%;
 	overflow: hidden;
+	margin: 2px;
 }
 
-.centre
+#canvas
 {
 	display: block;
 	margin-left: auto;
 	margin-right: auto;
-}
-
-.maxwidth
-{
 	max-width: 99%;
 	max-height: 99%;
 	z-index: 0;
 }
 
-filename
+#filename
 {
 	margin: 2px;
 	border-style: solid;
 	border-width: 2px;
 	border-color: red;
-	z-index: 100;
+	z-index: 10;
 	position: relative;
 	background-color: #FFFFFF;
 	width: auto;
 }
 
-viewport
+#viewport
 {
 	position: relative;
 	top: 0; bottom: 0; left: 0; right: 0
 }
 
-dialog-confirm
+#dialog-confirm
 {
 	display: none;
 }
 
-dialog-loading
+#dialog-loading
 {
 	display: none;
 }

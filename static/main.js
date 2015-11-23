@@ -1,7 +1,7 @@
 'use strict';
 
 var viewport = $( "#viewport" );
-var viewimg = $( "#viewimg" );
+var viewimg = $( "#canvas" );
 var filenameDiv = $( "#filename" );
 var canvas = viewimg[0];
 var photoIndex = 0;
