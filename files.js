@@ -60,12 +60,17 @@ export default class Files {
 	getImage( index ) {
 		if ( this._files.length > 0 ) {
 			while ( index < 0 ) {
-				console.log( index );
 				index += this._files.length;
 			}
 			return this._files[ index % this._files.length ];
 		}
 		return null;
+	}
+	
+	
+	clientViewImage( index ) {
+		// loads next X images for client view, so no waiting around
+		
 	}
 }
 

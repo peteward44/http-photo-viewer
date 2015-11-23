@@ -95,7 +95,11 @@ function loadNextPhoto( next, deleted ) {
 	$( "#dialog-loading" ).dialog( {
 		closeOnEscape: false,
 		height: 95,
+		close: function( event, ui ) {
+			modalOn = false;
+		},
 		open: function(event, ui) {
+			modalOn = true;
 			$(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
 			$( "#progressbar" ).progressbar({
 				value: false
@@ -136,14 +140,15 @@ function deletePicture() {
 		resizable: false,
 		height: 200,
 		modal: true,
+		close: function( event, ui ) {
+			modalOn = false;
+		},
 		buttons: {
 			"Delete picture": function() {
-				modalOn = false;
 				loadNextPhoto( true, true );
 				$( this ).dialog( "close" );
 			},
 			Cancel: function() {
-				modalOn = false;
 				$( this ).dialog( "close" );
 			}
 		}

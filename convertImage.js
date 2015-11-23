@@ -1,27 +1,27 @@
 'use strict';
 
-var fs = require( 'fs' );
-var path = require( 'path' );
-var piexifjs = require( 'piexifjs' );
+let fs = require( 'fs' );
+let path = require( 'path' );
+let piexifjs = require( 'piexifjs' );
 
-var sharp;
+let sharp;
 try {
 	sharp = require('sharp');
 }
 catch ( err ) {
 	// no sharp available - use backup lib
 }
-var Jimp = require("jimp");
+let Jimp = require("jimp");
 
 
-var newWidth = 300;
-var containHeight = 500;
+const newWidth = 300;
+const containHeight = 500;
 
 
 function calculateNewSize( w, h ) {
 	// work out if landscape or portrait
-	var isLandscape = w > h;
-	var ratio = w / h;
+	const isLandscape = w > h;
+	const ratio = w / h;
 	if ( isLandscape ) {
 		return {
 			width: 740,
