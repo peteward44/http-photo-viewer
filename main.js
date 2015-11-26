@@ -14,19 +14,19 @@ let g_files = new Files();
 const imagesToCache = 2; // caches 2 images ahead of where user is
 
 
-function rotateAndSave( index, rotation ) {
-	var p = g_files.getImage( index );
-	convertImage.rotate( p.path, { rotation: rotation, writeExif: true }, function( err, data, newOrientation ) {
-		g_files.updateOrientation( p.path, newOrientation );
-		let newp = p.path;
-		// let ext = path.extname( p.path );
-		// let fileNoExt = path.basename( p.path, ext );
-		// let newp = path.join( path.dirname( p.path ), fileNoExt + ".new" + ext );
-		fs.writeFile( newp, data, 'binary', function() {
-			console.log( "Written image " + p );
-		} );
-	} );
-}
+// function rotateAndSave( index, rotation ) {
+	// var p = g_files.getImage( index );
+	// convertImage.rotate( p.path, { rotation: rotation, writeExif: true }, function( err, data, newOrientation ) {
+		// g_files.updateOrientation( p.path, newOrientation );
+		// let newp = p.path;
+		// // let ext = path.extname( p.path );
+		// // let fileNoExt = path.basename( p.path, ext );
+		// // let newp = path.join( path.dirname( p.path ), fileNoExt + ".new" + ext );
+		// fs.writeFile( newp, data, 'binary', function() {
+			// console.log( "Written image " + p );
+		// } );
+	// } );
+// }
 
 
 async function nextRequestProcess( req, res ) {
@@ -41,10 +41,12 @@ async function nextRequestProcess( req, res ) {
 		if ( Boolean( req.query.previous.deleted ) === true ) {
 			console.log( "Deleted", index );
 			// TODO: mark for deletion
+			g_files.getImage( index ).deleted = true;
 		} else if ( req.query.previous.rotation !== undefined ) {
 			var rot = parseInt( req.query.previous.rotation, 10 );
 			if ( rot !== 0 ) {
-				rotateAndSave( index, rot );
+				// TODO: mark for rotation
+				g_files.getImage( index ).rotation = rot;
 			}
 		}
 		
@@ -57,11 +59,10 @@ async function nextRequestProcess( req, res ) {
 
 	res.send( JSON.stringify( {
 		index: reqIndex,
-		path: imageData.path,
-		data: image,
-		orientation: imageData.orientation
+		imageData: imageData,
+		data: image
 	} ) );
-	
+
 	// then order to cache the next 2 images in the direction we are travelling in
 	for ( let i=1; i<=imagesToCache; ++i ) {
 		let cacheIndex = reqIndex + ( forwards ? i : -i );
