@@ -90,13 +90,8 @@ function doJimp( imageFilename, options, callback ) {
 
 export async function clientView( imageFilename, options, callback ) {
 	
-	// let data = fs.readFileSync( imageFilename ).toString( 'binary' );
-	// let exif = piexifjs.load( data );
-	// let result = {};
-	// result.orientation = exif && exif[ "0th" ] && isFinite( exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] ) ? exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] : 0
-	
 	if ( options.noConvert ) {
-		let data = fs.readFileSync( imageFilename ).toString( 'binary' );
+		let data = fs.readFileSync( imageFilename );
 		return bufferToBase64( 'jpeg', data );
 	} else {
 		if ( sharp ) {

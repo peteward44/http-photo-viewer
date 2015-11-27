@@ -14,6 +14,10 @@ var modalOn = false;
 
 
 function render() {
+	while ( rotation < 0 ) {
+		rotation += 4;
+	}
+	rotation %= 4;
 	var sideways = ( rotation % 2 ) === 1;
 	canvas.height = sideways ? photoImg.width : photoImg.height;
 	canvas.width = sideways ? photoImg.height : photoImg.width;
@@ -32,7 +36,7 @@ function render() {
 
 function setPhotoData( data ) {
 	photoImg.onload = function() {
-		rotation = 0;
+		rotation = data.imageMeta.rotation;
 		rotationChange = 0;
 		flipHorz = false;
 		flipVert = false;
@@ -41,36 +45,36 @@ function setPhotoData( data ) {
 				flipHorz = true;
 				break;
 			case 3: // upside down
-				rotation = 2;
+				rotation += 2;
 				break;
 			case 4:
-				rotation = 2;
+				rotation += 2;
 				flipHorz = true;
 				break;
 			case 5:
-				rotation = 3;  // 90* anticlockwise
+				rotation += 3;  // 90* anticlockwise
 				flipVert = true;
 				break;
 			case 6:
-				rotation = 3;
+				rotation += 3;
 				break;
 			case 7:
-				rotation = 1; // 90* clockwise - needs to be rotated 270* to correct
+				rotation += 1; // 90* clockwise - needs to be rotated 270* to correct
 				flipVert = true;
 				break;
 			case 8:
-				rotation = 1;
+				rotation += 1;
 				break;
 		}
 		render();
 		$( "#dialog-loading" ).dialog( "close" );
 	};
-	photoImg.src = data.data;
+	photoImg.src = data.image.src;
 }
 
 
 function setFilename( data ) {
-	filenameDiv[0].innerHTML = data.path;
+	filenameDiv[0].innerHTML = data.imageMeta.path;
 }
 
 
@@ -80,7 +84,7 @@ function loadNextPhoto( next, deleted ) {
 	if ( next !== undefined ) {
 		nextIndex = photoIndex + ( next ? 1 : -1 );
 	}
-	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotation: rotationChange, deleted: deleted } }, function( data ) {
+	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotationChange: rotationChange, deleted: deleted } }, function( data ) {
 		setPhotoData( data );
 		setFilename( data );
 		photoIndex = nextIndex;
