@@ -14,27 +14,12 @@ export default class Files {
 	
 	_createFileObject( filePath ) {
 		return new Promise( function( resolve, reject ) {
-			let data = fs.readFileSync( filePath ).toString( 'binary' );
-			let exif = piexifjs.load( data );
 			resolve( {
-				path: filePath,
-				//exif: exif
-				orientation: exif && exif[ "0th" ] && isFinite( exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] ) ? exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] : 0
+				path: filePath
 			} );
 		} );
 	}
 	
-	
-	updateOrientation( filePath, orientation ) {
-		for ( let i=0; i<this._files.length; ++i ) {
-			let f = this._files[i];
-			if ( f.path === filePath ) {
-				f.orientation = orientation;
-				return;
-			}
-		}
-	}
-
 	
 	async init( rootFilePath ) {
 		// analyse directory given to find all files there
@@ -65,12 +50,6 @@ export default class Files {
 			return this._files[ index % this._files.length ];
 		}
 		return null;
-	}
-	
-	
-	clientViewImage( index ) {
-		// loads next X images for client view, so no waiting around
-		
 	}
 }
 

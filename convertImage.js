@@ -3,6 +3,7 @@
 let fs = require( 'fs' );
 let path = require( 'path' );
 let piexifjs = require( 'piexifjs' );
+let orientation = require( './orientation.js' );
 
 let sharp;
 try {
@@ -73,7 +74,7 @@ function doJimp( imageFilename, options, callback ) {
 //				fs.writeFileSync( 'out.png', data, 'binary' );
 				var str = bufferToBase64( 'jpeg', data );
 				console.log( "Finished." );
-				callback( null, str );
+				callback( null, { data: data } );
 			} );
 	});
 }
@@ -81,17 +82,20 @@ function doJimp( imageFilename, options, callback ) {
 
 
 export function clientView( imageFilename, options, callback ) {
-	if ( options.noConvert ) {
-		let data = fs.readFileSync( imageFilename );
-		let str = bufferToBase64( 'jpeg', data );
-		callback( null, str );
-	} else {
-		if ( sharp ) {
-			doSharp( imageFilename, options, callback );
-		} else {
-			doJimp( imageFilename, options, callback );
-		}
-	}
+	// if ( options.noConvert ) {
+		let data = fs.readFileSync( filePath ).toString( 'binary' );
+		let exif = piexifjs.load( data );
+		let result = {};
+		result.orientation = exif && exif[ "0th" ] && isFinite( exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] ) ? exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] : 0
+		result.data = data;
+		callback( null, data );
+	// } else {
+		// if ( sharp ) {
+			// doSharp( imageFilename, options, callback );
+		// } else {
+			// doJimp( imageFilename, options, callback );
+		// }
+	// }
 }
 
 
@@ -122,141 +126,45 @@ function doJimpRotate( imageFilename, options, callback ) {
 	});
 }
 
-// https://beradrian.wordpress.com/2008/11/14/rotate-exif-images/
-function rotateExifOrientation( rotation, originalOrientation ) {
-	switch ( originalOrientation ) {
-		default:
-		case 1: // straight
-			switch ( rotation ) {
-				default:
-				case 0:
-					return 0;
-				case 1:
-					return 8;
-				case 2:
-					return 3;
-				case 3:
-					return 6;
-			}
-			break;
-		case 2: // straight but flipped horizontally
-			switch ( rotation ) {
-				default:
-				case 0:
-					return 2;
-				case 1:
-					return 7;
-				case 2:
-					return 4;
-				case 3:
-					return 5;
-			}
-			break;
-		case 3: // upside down
-			switch ( rotation ) {
-				default:
-				case 0:
-					return 3;
-				case 1:
-					return 6;
-				case 2:
-					return 1;
-				case 3:
-					return 8;
-			}
-			break;
-		case 4: // upside down and flipped horizontally
-			switch ( rotation ) {
-				default:
-				case 0:
-					return 4;
-				case 1:
-					return 5;
-				case 2:
-					return 2;
-				case 3:
-					return 7;
-			}
-			break;
-		case 5: // 90* anticlockwise flipped
-			switch ( rotation ) {
-				default:
-				case 0:
-					return 5;
-				case 1:
-					return 2;
-				case 2:
-					return 7;
-				case 3:
-					return 4;
-			}
-			break;
-		case 6: // 90* anticlockwise
-			switch ( rotation ) {
-				default:
-				case 0:
-					return 6;
-				case 1:
-					return 1;
-				case 2:
-					return 8;
-				case 3:
-					return 3;
-			}
-			break;
-		case 7: // 90* clockwise flipped
-			switch ( rotation ) {
-				default:
-				case 0:
-					return 7;
-				case 1:
-					return 4;
-				case 2:
-					return 5;
-				case 3:
-					return 2;
-			}
-			break;
-		case 8: // 90* clockwise
-			switch ( rotation ) {
-				default:
-				case 0:
-					return 8;
-				case 1:
-					return 3;
-				case 2:
-					return 6;
-				case 3:
-					return 1;
-			}
-			break;
-	}
-}
 
+export function rotateExif( data, rotation ) {
+	if ( !isFinite( rotation ) || rotation === 0 ) {
+		return data;
+	}
+	while ( rotation < 0 ) {
+		rotation += 4;
+	}
+	rotation %= 4;
+	console.log( "Rotating " + rotation );
+
+	let exif = piexifjs.load( data.data );
+	let originalOrientation = 0;
+	if ( !exif ) {
+		exif = {};
+	}
+	if ( !exif[ "0th" ] ) {
+		exif[ "0th" ] = {};
+	}
+	if ( isFinite( exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] ) ) {
+		originalOrientation = exif[ "0th" ][ piexifjs.ImageIFD.Orientation ];
+	}
+	let newOrientation = orientation.rotate( originalOrientation, rotation );
+	console.log( "Old Orientation=" + originalOrientation + " new=" + newOrientation );
+	exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] = newOrientation;
+//	console.log( "Outputting exif data " + imageFilename + ".exif" );
+//	fs.writeFileSync( imageFilename + ".exif", JSON.stringify( exif, null, 2 ) );	
+	let exifBytes = piexifjs.dump( exif );
+	data.data = piexifjs.insert( exifBytes, data.data );
+	data.orientation = newOrientation;
+	return data;
+}
 
 
 export function rotate( imageFilename, options, callback ) {
 	if ( options.writeExif ) { // rotate image by rewriting exif orientation tag - don't re-encode the image
 		let jpeg = fs.readFileSync( imageFilename );
 		let data = jpeg.toString( "binary" );
-		let exif = piexifjs.load( data );
-		let originalOrientation = 0;
-		if ( !exif ) {
-			exif = {};
-		}
-		if ( !exif[ "0th" ] ) {
-			exif[ "0th" ] = {};
-		}
-		if ( isFinite( exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] ) ) {
-			originalOrientation = exif[ "0th" ][ piexifjs.ImageIFD.Orientation ];
-		}
-		let newOrientation = rotateExifOrientation( options.rotation, originalOrientation );
-		console.log( "Old Orientation=" + originalOrientation + " new=" + newOrientation );
-		exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] = newOrientation;
-		let exifBytes = piexifjs.dump( exif );
-		let newdata = piexifjs.insert( exifBytes, data );
-	//	console.log( "Outputting exif data " + imageFilename + ".exif" );
-	//	fs.writeFileSync( imageFilename + ".exif", JSON.stringify( exif, null, 2 ) );
+		let newdata = rotateExif( data, options.rotation );
 		callback( null, newdata, newOrientation );
 	} else {
 		if ( sharp ) {

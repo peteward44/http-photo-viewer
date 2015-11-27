@@ -28,6 +28,21 @@ const imagesToCache = 2; // caches 2 images ahead of where user is
 	// } );
 // }
 
+function bufferToBase64( format, data ) {
+	var prefix = "data:image/" + format + ";base64,";
+	var base64 = data.toString('base64');
+	var photoData = prefix + base64;
+	return photoData;
+}
+
+
+function transmitImage( image ) {
+	return {
+		data: bufferToBase64( 'jpeg', image.data ),
+		orientation: image.orientation
+	};
+}
+
 
 async function nextRequestProcess( req, res ) {
 	//console.log( "req", req.query );
@@ -36,18 +51,16 @@ async function nextRequestProcess( req, res ) {
 	console.log( "reqIndex", reqIndex );
 	
 	// save previous image if modified
+	let rotation;
 	if ( req.query.previous ) {
 		let index = parseInt( req.query.previous.index, 10 );
+		let file = g_files.getImage( index );
 		if ( Boolean( req.query.previous.deleted ) === true ) {
 			console.log( "Deleted", index );
-			// TODO: mark for deletion
-			g_files.getImage( index ).deleted = true;
+			// mark for deletion
+			file.deleted = true;
 		} else if ( req.query.previous.rotation !== undefined ) {
-			var rot = parseInt( req.query.previous.rotation, 10 );
-			if ( rot !== 0 ) {
-				// TODO: mark for rotation
-				g_files.getImage( index ).rotation = rot;
-			}
+			rotation = parseInt( req.query.previous.rotation, 10 );
 		}
 		
 		forwards = index <= reqIndex;
@@ -55,12 +68,11 @@ async function nextRequestProcess( req, res ) {
 	
 	// then load next image
 	let imageData = g_files.getImage( reqIndex );
-	let image = await imageCache.loadImage( imageData.path );
+	let image = await imageCache.loadImage( imageData.path, rotation );
 
 	res.send( JSON.stringify( {
 		index: reqIndex,
-		imageData: imageData,
-		data: image
+		image: transmitImage( image )
 	} ) );
 
 	// then order to cache the next 2 images in the direction we are travelling in

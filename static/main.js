@@ -36,7 +36,7 @@ function setPhotoData( data ) {
 		rotationChange = 0;
 		flipHorz = false;
 		flipVert = false;
-		switch ( data.imageData.orientation ) {
+		switch ( data.image.orientation ) {
 			case 2:
 				flipHorz = true;
 				break;
