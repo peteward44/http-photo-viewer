@@ -25,50 +25,40 @@ class ImageCache {
 		}
 		
 		this._loading = true;
-		let loadRequest = this._loadQueue.pop();
-		
-		if ( this._images.hasOwnProperty( loadRequest.path ) ) {
-			// already in cache
-			if ( isFinite( loadRequest.rotation ) ) {
-				this._images[ loadRequest.path ] = convertImage.rotateExif( this._images[ loadRequest.path ], loadRequest.rotation );
-			}
-			loadRequest.resolve( this._images[ loadRequest.path ] );
-			this._loading = false;
-			return;
-		}
-		
+		let loadRequest = this._loadQueue.pop();		
 		console.log( "Loading " + loadRequest.path );
-		convertImage.clientView( loadRequest.path, { /*noConvert: true*/ }, function( err, str ) {
-			if ( !err ) {
-				that._images[ loadRequest.path ] = convertImage.rotateExif( str, loadRequest.rotation );
+		let loadedImage;
+		let prom = convertImage.clientView( loadRequest.path, { noConvert: true } );
+		prom.then( ( img ) => {
+			console.log( "Resolving" );
+			that._images[ loadRequest.path ] = img;
+			if ( loadRequest.resolve ) {
 				loadRequest.resolve( that._images[ loadRequest.path ] );
-			} else {
-				loadRequest.reject( err );
 			}
+			console.log( "Post resolve" );
 			that._loading = false;
+			console.log( "Processing next in queue" );
 			setImmediate( () => { that._checkQueue(); } );
 		} );
-	}
-	
-	
-	_loadImage( resolve, reject, filePath, rotation ) {
-		// add to the load queue, and the surrounding 2 images
-		console.log( "Requesting " + filePath );
-		this._loadQueue.push( {
-			path: filePath,
-			rotation: rotation,
-			resolve: resolve,
-			reject: reject
+		prom.catch( ( err ) => {
+			console.error( "Error loading image" );
+			console.error( err );
 		} );
-		this._checkQueue();
 	}
 
 	
-	loadImage( filePath, rotation ) {
+	loadImage( filePath, callback ) {
 		let that = this;
-		return new Promise( ( resolve, reject ) => {
-			that._loadImage( resolve, reject, filePath, rotation );
-		} );
+		console.log( "Requesting " + filePath );
+		if ( that._images.hasOwnProperty( filePath ) ) {
+			callback( that._images[ filePath ] );
+		} else {
+			that._loadQueue.push( {
+				path: filePath,
+				resolve: callback
+			} );
+			that._checkQueue();
+		}
 	}
 }
 

@@ -15,7 +15,8 @@ export default class Files {
 	_createFileObject( filePath ) {
 		return new Promise( function( resolve, reject ) {
 			resolve( {
-				path: filePath
+				path: filePath,
+				rotation: 0
 			} );
 		} );
 	}

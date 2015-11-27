@@ -47,84 +47,90 @@ function bufferToBase64( format, data ) {
 
 function doSharp( imageFilename, options, callback ) {
 	console.log( "Using sharp for image conversion..." );
-	sharp( imageFilename )
-		.metadata()
-		.then(function(data) {
-			var dimensions = calculateNewSize( data.width, data.height );
-			return image.resize(dimensions.width, dimensions.height)
-				.webp()
-				.toBuffer()
-				.then( function( data ) {
-					var photoData = bufferToBase64( "webp", data );
-					console.log( "Finished." );
-					callback( null, photoData );
-				} );
-		});
+	return new Promise( ( resolve ) => {
+		sharp( imageFilename )
+			.metadata()
+			.then(function(data) {
+				var dimensions = calculateNewSize( data.width, data.height );
+				return image.resize(dimensions.width, dimensions.height)
+					.webp()
+					.toBuffer()
+					.then( function( data ) {
+						var photoData = bufferToBase64( "webp", data );
+						console.log( "Finished." );
+						resolve( photoData );
+					} );
+			});
+	} );
 }
 
 
 
 function doJimp( imageFilename, options, callback ) {
 	console.log( "Using Jimp fallback for image conversion..." );
-	var j = new Jimp( imageFilename, function (err, image) {
-		var dimensions = calculateNewSize( image.bitmap.width, image.bitmap.height );
-		this.resize( dimensions.width, dimensions.height )
-			.quality( 95 )
-			.getBuffer( Jimp.MIME_JPEG, function( err, data ) {
-//				fs.writeFileSync( 'out.png', data, 'binary' );
-				var str = bufferToBase64( 'jpeg', data );
-				console.log( "Finished." );
-				callback( null, { data: data } );
-			} );
-	});
-}
-
-
-
-export function clientView( imageFilename, options, callback ) {
-	// if ( options.noConvert ) {
-		let data = fs.readFileSync( filePath ).toString( 'binary' );
-		let exif = piexifjs.load( data );
-		let result = {};
-		result.orientation = exif && exif[ "0th" ] && isFinite( exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] ) ? exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] : 0
-		result.data = data;
-		callback( null, data );
-	// } else {
-		// if ( sharp ) {
-			// doSharp( imageFilename, options, callback );
-		// } else {
-			// doJimp( imageFilename, options, callback );
-		// }
-	// }
+	return new Promise( ( resolve, reject ) => {
+		var j = new Jimp( imageFilename, function (err, image) {
+			if ( err ) {
+				return reject( err );
+			}
+			var dimensions = calculateNewSize( image.bitmap.width, image.bitmap.height );
+			this.resize( dimensions.width, dimensions.height )
+				.quality( 95 )
+				.getBuffer( Jimp.MIME_JPEG, function( err, data ) {
+					var str = bufferToBase64( 'jpeg', data );
+					console.log( "Finished." );
+					resolve( str );
+				} );
+		});
+	} );
 }
 
 
 
 
-
-function doSharpRotate( imageFilename, options, callback ) {
-	console.log( "Using sharp for image conversion..." );
-	sharp( imageFilename )
-		.rotate( 90 * options.rotation )
-		.toFormat(sharp.format.jpeg)
-		.toBuffer()
-		.then( function( data ) {
-			callback( null, data, 0 );
-		} );
+export async function clientView( imageFilename, options, callback ) {
+	
+	// let data = fs.readFileSync( imageFilename ).toString( 'binary' );
+	// let exif = piexifjs.load( data );
+	// let result = {};
+	// result.orientation = exif && exif[ "0th" ] && isFinite( exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] ) ? exif[ "0th" ][ piexifjs.ImageIFD.Orientation ] : 0
+	
+	if ( options.noConvert ) {
+		let data = fs.readFileSync( imageFilename ).toString( 'binary' );
+		return bufferToBase64( 'jpeg', data );
+	} else {
+		if ( sharp ) {
+			return await doSharp( imageFilename, options, callback );
+		} else {
+			return await doJimp( imageFilename, options, callback );
+		}
+	}
 }
 
 
+// function doSharpRotate( imageFilename, options, callback ) {
+	// console.log( "Using sharp for image conversion..." );
+	// sharp( imageFilename )
+		// .rotate( 90 * options.rotation )
+		// .toFormat(sharp.format.jpeg)
+		// .toBuffer()
+		// .then( function( data ) {
+			// callback( null, data, 0 );
+		// } );
+// }
 
-function doJimpRotate( imageFilename, options, callback ) {
-	console.log( "Using Jimp fallback for image conversion..." );
-	var j = new Jimp( imageFilename, function (err, image) {
-		this.rotate( 90 * options.rotation )
-			.quality( 100 )
-			.getBuffer( Jimp.MIME_JPEG, function( err, data ) {
-				callback( null, data, 0 );
-			} );
-	});
-}
+
+
+// function doJimpRotate( imageFilename, options, callback ) {
+	// console.log( "Using Jimp fallback for image conversion..." );
+	// var j = new Jimp( imageFilename, function (err, image) {
+		// this.rotate( 90 * options.rotation )
+			// .quality( 100 )
+			// .getBuffer( Jimp.MIME_JPEG, function( err, data ) {
+				// callback( null, data, 0 );
+			// } );
+	// });
+// }
 
 
 export function rotateExif( data, rotation ) {
@@ -158,20 +164,3 @@ export function rotateExif( data, rotation ) {
 	data.orientation = newOrientation;
 	return data;
 }
-
-
-export function rotate( imageFilename, options, callback ) {
-	if ( options.writeExif ) { // rotate image by rewriting exif orientation tag - don't re-encode the image
-		let jpeg = fs.readFileSync( imageFilename );
-		let data = jpeg.toString( "binary" );
-		let newdata = rotateExif( data, options.rotation );
-		callback( null, newdata, newOrientation );
-	} else {
-		if ( sharp ) {
-			doSharpRotate( imageFilename, options, callback );
-		} else {
-			doJimpRotate( imageFilename, options, callback );
-		}
-	}
-};
-
