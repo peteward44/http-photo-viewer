@@ -50,3 +50,15 @@ body, html {
 	display: none;
 }
 
+#lastkeypress
+{
+	margin: 2px;
+	border-style: solid;
+	border-width: 2px;
+	border-color: red;
+	z-index: 10;
+	position: relative;
+	background-color: #FFFFFF;
+	width: auto;
+	font-size: 200%;
+}

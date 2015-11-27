@@ -195,6 +195,7 @@ function doCommitConfirmation() {
 
 function onKeyPress( evt ) {
 	console.log( evt.which );
+	$( "#lastkeypress" ).text( evt.which.toString() );
 	if ( !modalOn ) {
 		// key presses only allowed when a modal dialog is not displayed
 		switch ( evt.which ) {
