@@ -15,6 +15,13 @@ class ImageCache {
 	}
 	
 	
+	removeFromCache( imageFilename ) {
+		if ( this._images.hasOwnProperty( imageFilename ) ) {
+			delete this._images[ imageFilename ];
+		}
+	}
+	
+	
 	_loadComplete( imageFilename, callback ) {
 		let that = this;
 		

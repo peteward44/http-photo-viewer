@@ -3,7 +3,8 @@
 var fs = require( 'fs' );
 var path = require( 'path' );
 var walkSync = require('walk-sync');
-var piexifjs = require( 'piexifjs' );
+var convertImage = require('./convertImage.js');
+let imageCache = require( './imageCache.js' );
 
 
 export default class Files {
@@ -11,6 +12,27 @@ export default class Files {
 		this._files = [];
 	}
 	
+
+	commitChanges() {
+		for ( let i=0; i<this._files.length; ++i ) {
+			let file = this._files[i];
+			if ( file.deleted ) {
+				fs.remove( file.path );
+				console.log( "Deleted", file.path );
+				imageCache.removeFromCache( file.path );
+				continue;
+			}
+			if ( file.rotation > 0 ) {
+				let image = fs.readFileSync( file.path ).toString( 'binary' );
+				let rotatedImage = convertImage.rotateExif( image, file.rotation );
+				fs.writeFileSync( file.path, rotatedImage, 'binary' );
+				console.log( "Rotated", file.path );
+				file.rotation = 0;
+				imageCache.removeFromCache( file.path );
+			}
+		}
+	}
+
 	
 	_createFileObject( filePath ) {
 		return new Promise( function( resolve, reject ) {

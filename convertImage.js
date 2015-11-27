@@ -138,7 +138,7 @@ export function rotateExif( data, rotation ) {
 	rotation %= 4;
 	console.log( "Rotating " + rotation );
 
-	let exif = piexifjs.load( data.data );
+	let exif = piexifjs.load( data );
 	let originalOrientation = 0;
 	if ( !exif ) {
 		exif = {};
@@ -155,7 +155,6 @@ export function rotateExif( data, rotation ) {
 //	console.log( "Outputting exif data " + imageFilename + ".exif" );
 //	fs.writeFileSync( imageFilename + ".exif", JSON.stringify( exif, null, 2 ) );	
 	let exifBytes = piexifjs.dump( exif );
-	data.data = piexifjs.insert( exifBytes, data.data );
-	data.orientation = newOrientation;
+	data = piexifjs.insert( exifBytes, data );
 	return data;
 }

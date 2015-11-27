@@ -14,21 +14,6 @@ let g_files = new Files();
 const imagesToCache = 2; // caches 2 images ahead of where user is
 
 
-// function rotateAndSave( index, rotation ) {
-	// var p = g_files.getImage( index );
-	// convertImage.rotate( p.path, { rotation: rotation, writeExif: true }, function( err, data, newOrientation ) {
-		// g_files.updateOrientation( p.path, newOrientation );
-		// let newp = p.path;
-		// // let ext = path.extname( p.path );
-		// // let fileNoExt = path.basename( p.path, ext );
-		// // let newp = path.join( path.dirname( p.path ), fileNoExt + ".new" + ext );
-		// fs.writeFile( newp, data, 'binary', function() {
-			// console.log( "Written image " + p );
-		// } );
-	// } );
-// }
-
-
 function nextRequestProcess( req, res ) {
 	//console.log( "req", req.query );
 	let forwards = true;
@@ -70,12 +55,20 @@ function nextRequestProcess( req, res ) {
 }
 
 
+function commitProcess( req, res ) {
+	console.log( "Commiting..." );
+	g_files.commitChanges();
+	res.send( JSON.stringify( {} ) );
+}
+
+
 export default async function start() {
 
 	await g_files.init( photoDir );
 	var app = express();
 	app.use( express.static( staticDir ) );
 	app.get('/next', nextRequestProcess );
+	app.get('/commit', commitProcess );
 	
 	// cache first images
 	for ( let i=-imagesToCache; i<=imagesToCache; ++i ) {
