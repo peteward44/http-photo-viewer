@@ -67,7 +67,7 @@ function setPhotoData( data ) {
 				break;
 		}
 		render();
-		$( "#dialog-loading" ).dialog( "close" );
+		hideLoadingDialog();
 	};
 	photoImg.src = data.image.src;
 }
@@ -78,24 +78,7 @@ function setFilename( data ) {
 }
 
 
-function loadNextPhoto( next, deleted ) {
-	var previousPhotoData;
-	var nextIndex = 0;
-	if ( next !== undefined ) {
-		nextIndex = photoIndex + ( next ? 1 : -1 );
-	}
-	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotationChange: rotationChange, deleted: deleted } }, function( data ) {
-		setPhotoData( data );
-		setFilename( data );
-		photoIndex = nextIndex;
-	} );
-	viewimg.hide();
-	// var ctx = canvas.getContext( "2d" );
-	// ctx.save();
-	// ctx.fillStyle = "#C4C4C4";
-	// ctx.fillRect( 0, 0, canvas.width, canvas.height );
-	// ctx.restore();
-	
+function showLoadingDialog() {
 	$( "#dialog-loading" ).dialog( {
 		closeOnEscape: false,
 		height: 95,
@@ -110,6 +93,26 @@ function loadNextPhoto( next, deleted ) {
 			});
 		}
 	} );
+}
+
+
+function hideLoadingDialog() {
+	$( "#dialog-loading" ).dialog( "close" );
+}
+
+
+function loadNextPhoto( next, deleted ) {
+	var previousPhotoData;
+	var nextIndex = 0;
+	if ( next !== undefined ) {
+		nextIndex = photoIndex + ( next ? 1 : -1 );
+	}
+	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotationChange: rotationChange, deleted: deleted } }, function( data ) {
+		setPhotoData( data );
+		setFilename( data );
+		photoIndex = nextIndex;
+	} );
+	showLoadingDialog();
 }
 
 
@@ -160,6 +163,36 @@ function deletePicture() {
 }
 
 
+function doCommit() {
+	showLoadingDialog();
+	$.getJSON( '/commit', {}, function() {
+		hideLoadingDialog();
+	} );
+}
+
+
+function doCommitConfirmation() {
+	modalOn = true;
+	$( "#dialog-confirm-commit" ).dialog({
+		resizable: false,
+		height: 200,
+		modal: true,
+		close: function( event, ui ) {
+			modalOn = false;
+		},
+		buttons: {
+			"Commit": function() {
+				doCommit();
+				$( this ).dialog( "close" );
+			},
+			Cancel: function() {
+				$( this ).dialog( "close" );
+			}
+		}
+	});
+}
+
+
 function onKeyPress( evt ) {
 	console.log( evt.which );
 	if ( !modalOn ) {
@@ -180,6 +213,9 @@ function onKeyPress( evt ) {
 				break;
 			case 46: // delete
 				deletePicture();
+				break;
+			case 67: // C
+				doCommitConfirmation();
 				break;
 		}
 	}

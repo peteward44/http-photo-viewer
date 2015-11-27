@@ -40,6 +40,11 @@ body, html {
 	display: none;
 }
 
+#dialog-confirm-commit
+{
+	display: none;
+}
+
 #dialog-loading
 {
 	display: none;
