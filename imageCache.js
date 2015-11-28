@@ -1,10 +1,13 @@
 'use strict';
 
-var fs = require( 'fs' );
+var fs = require( 'fs-extra' );
 var path = require( 'path' );
+var uuid = require( 'node-uuid' );
 var walkSync = require('walk-sync');
 var piexifjs = require( 'piexifjs' );
 var convertImage = require('./convertImage.js');
+
+const imageRootDir = path.join( __dirname, 'static', 'files' );
 
 
 class ImageCache {
@@ -57,10 +60,16 @@ class ImageCache {
 			return this._loadComplete( loadRequest.path, loadRequest.resolve );
 		}
 		console.log( "Loading " + loadRequest.path );
-		let prom = convertImage.clientView( loadRequest.path, { noConvert: false } );
+		let prom = convertImage.clientView( loadRequest.path, { noConvert: true } );
 		prom.then( ( img ) => {
+			let filename = uuid.v4() + ".jpg";
+			fs.ensureDirSync( imageRootDir );
+			let newpath = path.join( imageRootDir, filename );
+			fs.writeFileSync( newpath, img, 'binary' );
+			let url = '/files/' + filename;
 			that._images[ loadRequest.path ] = {
-				src: img
+				//src: img
+				src: url
 			};
 			return this._loadComplete( loadRequest.path, loadRequest.resolve );
 		} );

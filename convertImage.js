@@ -56,9 +56,9 @@ function doSharp( imageFilename, options, callback ) {
 					.webp()
 					.toBuffer()
 					.then( function( data ) {
-						var photoData = bufferToBase64( "webp", data );
+					//	var photoData = bufferToBase64( "webp", data );
 						console.log( "Finished." );
-						resolve( photoData );
+						resolve( data );
 					} );
 			});
 	} );
@@ -77,9 +77,9 @@ function doJimp( imageFilename, options, callback ) {
 			this.resize( dimensions.width, dimensions.height )
 				.quality( 95 )
 				.getBuffer( Jimp.MIME_JPEG, function( err, data ) {
-					var str = bufferToBase64( 'jpeg', data );
+				//	var str = bufferToBase64( 'jpeg', data );
 					console.log( "Finished." );
-					resolve( str );
+					resolve( data );
 				} );
 		});
 	} );
@@ -92,7 +92,8 @@ export async function clientView( imageFilename, options, callback ) {
 	
 	if ( options.noConvert ) {
 		let data = fs.readFileSync( imageFilename );
-		return bufferToBase64( 'jpeg', data );
+		//return bufferToBase64( 'jpeg', data );
+		return data;
 	} else {
 		if ( sharp ) {
 			return await doSharp( imageFilename, options, callback );
