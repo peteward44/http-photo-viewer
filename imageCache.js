@@ -24,7 +24,7 @@ class ImageCache {
 	
 	_loadComplete( imageFilename, callback ) {
 		let that = this;
-		
+		console.log( "_loadCOmplete" );	
 		if ( imageFilename ) {
 			let data = fs.readFileSync( imageFilename ).toString( 'binary' );
 			let exif = piexifjs.load( data );
@@ -76,8 +76,9 @@ class ImageCache {
 		let that = this;
 		console.log( "Requesting " + filePath );
 		if ( that._images.hasOwnProperty( filePath ) ) {
+			console.log( "Returning cached version" );
 			if ( callback ) {
-				callback( that._images[ filePath ] );
+				setImmediate( function() { callback( that._images[ filePath ] ); } );
 			}
 		} else {
 			that._loadQueue.push( {
