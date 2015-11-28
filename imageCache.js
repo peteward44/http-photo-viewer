@@ -57,7 +57,7 @@ class ImageCache {
 			return this._loadComplete( loadRequest.path, loadRequest.resolve );
 		}
 		console.log( "Loading " + loadRequest.path );
-		let prom = convertImage.clientView( loadRequest.path, { noConvert: true } );
+		let prom = convertImage.clientView( loadRequest.path, { noConvert: false } );
 		prom.then( ( img ) => {
 			that._images[ loadRequest.path ] = {
 				src: img

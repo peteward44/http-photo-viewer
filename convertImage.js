@@ -48,8 +48,8 @@ function bufferToBase64( format, data ) {
 function doSharp( imageFilename, options, callback ) {
 	console.log( "Using sharp for image conversion..." );
 	return new Promise( ( resolve ) => {
-		sharp( imageFilename )
-			.metadata()
+		let image = sharp( imageFilename );
+		image.metadata()
 			.then(function(data) {
 				var dimensions = calculateNewSize( data.width, data.height );
 				return image.resize(dimensions.width, dimensions.height)
