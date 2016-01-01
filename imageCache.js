@@ -27,7 +27,6 @@ class ImageCache {
 	
 	_loadComplete( imageFilename, callback ) {
 		let that = this;
-		console.log( "_loadCOmplete" );	
 		if ( imageFilename ) {
 			let data = fs.readFileSync( imageFilename ).toString( 'binary' );
 			let exif = piexifjs.load( data );
@@ -60,7 +59,7 @@ class ImageCache {
 			return this._loadComplete( loadRequest.path, loadRequest.resolve );
 		}
 		console.log( "Loading " + loadRequest.path );
-		let prom = convertImage.clientView( loadRequest.path, { noConvert: true } );
+		let prom = convertImage.clientView( loadRequest.path, { noConvert: false } );
 		prom.then( ( img ) => {
 			let filename = uuid.v4() + ".jpg";
 			fs.ensureDirSync( imageRootDir );
