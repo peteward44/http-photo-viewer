@@ -18,7 +18,8 @@
     "jimp": "^0.2.9",
     "node-uuid": "^1.4.7",
     "piexifjs": "^1.0.0",
-    "walk-sync": "^0.2.5"
+    "walk-sync": "^0.2.5",
+    "yargs": "^3.31.0"
   },
   "optionalDependencies": {
     "sharp": "^0.11.3"
