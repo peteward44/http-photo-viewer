@@ -126,16 +126,18 @@ function set_body_height() { // set body height = window height
 	console.log( "set_body_height" );
 	viewport.height($(window).height());
 	console.log( "canvas w=" + canvas.width + " h=" + canvas.height );
+	var canvasAr = canvas.width / canvas.height;
+	var windowAr = viewport.innerWidth() / viewport.innerHeight();
 	// set aspect ratio of canvas
-	if ( canvas.width > canvas.height ) {
-		canvas.style.width = '100%';
+	if ( canvasAr > windowAr ) {
+		canvas.style.width = viewport.innerWidth() + 'px';
 		var ar = canvas.height / canvas.width;
-		canvas.style.height = Math.floor( ar * 100 ) + '%';
+		canvas.style.height = Math.floor( viewport.innerWidth() * ar ) + 'px';
 		console.log( "ar=" + ar );
 	} else {
-		canvas.style.height = '100%';
+		canvas.style.height = viewport.innerHeight() + 'px';
                 var ar = canvas.width / canvas.height;
-                canvas.style.width = Math.floor( ar * 100 ) + '%';
+                canvas.style.width = Math.floor( viewport.innerHeight() * ar ) + 'px';
 		console.log( "ar=" + ar );
 	}
 }
