@@ -19,9 +19,11 @@ function render() {
 	}
 	rotation %= 4;
 	var sideways = ( rotation % 2 ) === 1;
+	var ctx = canvas.getContext("2d");
+	ctx.clearRect( 0, 0, canvas.width, canvas.height );
 	canvas.height = sideways ? photoImg.width : photoImg.height;
 	canvas.width = sideways ? photoImg.height : photoImg.width;
-	var ctx = canvas.getContext("2d");	
+	ctx = canvas.getContext("2d");	
 	ctx.save();
 	ctx.translate(canvas.width/2, canvas.height/2);
 	if ( flipHorz || flipVert ) {
@@ -31,11 +33,14 @@ function render() {
 	ctx.drawImage(photoImg, -photoImg.width/2, -photoImg.height/2);
 	ctx.restore();
 	viewimg.show();
+	set_body_height();
 }
 
 
 function setPhotoData( data ) {
+	console.log( "setPhotoData" );
 	photoImg.onload = function() {
+		console.log( "setPhotoData.onload" );
 		rotation = data.imageMeta.rotation;
 		rotationChange = 0;
 		flipHorz = false;
@@ -102,6 +107,7 @@ function hideLoadingDialog() {
 
 
 function loadNextPhoto( next, deleted ) {
+	console.log( "loadNextPhoto" );
 	var previousPhotoData;
 	var nextIndex = 0;
 	if ( next !== undefined ) {
@@ -117,7 +123,21 @@ function loadNextPhoto( next, deleted ) {
 
 
 function set_body_height() { // set body height = window height
+	console.log( "set_body_height" );
 	viewport.height($(window).height());
+	console.log( "canvas w=" + canvas.width + " h=" + canvas.height );
+	// set aspect ratio of canvas
+	if ( canvas.width > canvas.height ) {
+		canvas.style.width = '100%';
+		var ar = canvas.height / canvas.width;
+		canvas.style.height = Math.floor( ar * 100 ) + '%';
+		console.log( "ar=" + ar );
+	} else {
+		canvas.style.height = '100%';
+                var ar = canvas.width / canvas.height;
+                canvas.style.width = Math.floor( ar * 100 ) + '%';
+		console.log( "ar=" + ar );
+	}
 }
 
 
@@ -195,7 +215,9 @@ function doCommitConfirmation() {
 
 function onKeyPress( evt ) {
 	console.log( evt.which );
+	console.log( "onKeyPress" );
 	$( "#lastkeypress" ).text( evt.which.toString() );
+	console.log( "modalOn", modalOn );
 	if ( !modalOn ) {
 		// key presses only allowed when a modal dialog is not displayed
 		switch ( evt.which ) {
@@ -225,9 +247,10 @@ function onKeyPress( evt ) {
 
 
 window.onload = function() {
+	console.log( "window.onload" );
 	var win = $(window);
 	win.bind('resize', set_body_height);
-	win.keydown( onKeyPress );	
+	win.keydown( onKeyPress );
 	loadNextPhoto();
 	set_body_height();
 };

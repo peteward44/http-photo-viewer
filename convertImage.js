@@ -53,7 +53,8 @@ function doSharp( imageFilename, options, callback ) {
 			.then(function(data) {
 				var dimensions = calculateNewSize( data.width, data.height );
 				return image.resize(dimensions.width, dimensions.height)
-					.webp()
+					.jpeg()
+		//			.webp()
 					.toBuffer()
 					.then( function( data ) {
 					//	var photoData = bufferToBase64( "webp", data );
