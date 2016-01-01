@@ -4,7 +4,7 @@ require( 'babel/register' ) ({
 		optional: ['es7.asyncFunctions']
 	});
 
-var main = require( './main.js' );
+var main = require( './lib/main.js' );
 
 var prom = main();
 prom.then( function() {
