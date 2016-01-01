@@ -33,14 +33,12 @@ function render() {
 	ctx.drawImage(photoImg, -photoImg.width/2, -photoImg.height/2);
 	ctx.restore();
 	viewimg.show();
-	set_body_height();
+	setBodyHeight();
 }
 
 
 function setPhotoData( data ) {
-	console.log( "setPhotoData" );
 	photoImg.onload = function() {
-		console.log( "setPhotoData.onload" );
 		rotation = data.imageMeta.rotation;
 		rotationChange = 0;
 		flipHorz = false;
@@ -107,7 +105,6 @@ function hideLoadingDialog() {
 
 
 function loadNextPhoto( next, deleted ) {
-	console.log( "loadNextPhoto" );
 	var previousPhotoData;
 	var nextIndex = 0;
 	if ( next !== undefined ) {
@@ -122,23 +119,18 @@ function loadNextPhoto( next, deleted ) {
 }
 
 
-function set_body_height() { // set body height = window height
-	console.log( "set_body_height" );
+function setBodyHeight() { // set body height = window height
+	// set size of viewport div
 	viewport.height($(window).height());
-	console.log( "canvas w=" + canvas.width + " h=" + canvas.height );
 	var canvasAr = canvas.width / canvas.height;
 	var windowAr = viewport.innerWidth() / viewport.innerHeight();
 	// set aspect ratio of canvas
 	if ( canvasAr > windowAr ) {
 		canvas.style.width = viewport.innerWidth() + 'px';
-		var ar = canvas.height / canvas.width;
-		canvas.style.height = Math.floor( viewport.innerWidth() * ar ) + 'px';
-		console.log( "ar=" + ar );
+		canvas.style.height = Math.floor( viewport.innerWidth() * canvasAr ) + 'px';
 	} else {
 		canvas.style.height = viewport.innerHeight() + 'px';
-                var ar = canvas.width / canvas.height;
-                canvas.style.width = Math.floor( viewport.innerHeight() * ar ) + 'px';
-		console.log( "ar=" + ar );
+		canvas.style.width = Math.floor( viewport.innerHeight() * canvasAr ) + 'px';
 	}
 }
 
@@ -217,9 +209,7 @@ function doCommitConfirmation() {
 
 function onKeyPress( evt ) {
 	console.log( evt.which );
-	console.log( "onKeyPress" );
 	$( "#lastkeypress" ).text( evt.which.toString() );
-	console.log( "modalOn", modalOn );
 	if ( !modalOn ) {
 		// key presses only allowed when a modal dialog is not displayed
 		switch ( evt.which ) {
@@ -249,11 +239,10 @@ function onKeyPress( evt ) {
 
 
 window.onload = function() {
-	console.log( "window.onload" );
 	var win = $(window);
-	win.bind('resize', set_body_height);
+	win.bind('resize', setBodyHeight);
 	win.keydown( onKeyPress );
 	loadNextPhoto();
-	set_body_height();
+	setBodyHeight();
 };
 
