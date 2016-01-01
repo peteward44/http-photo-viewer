@@ -1,10 +1,13 @@
 {
   "name": "http-photo-viewer",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "http-photo-viewer": "./bin/http-photo-viewer"
   },
   "author": "",
   "license": "MIT",
