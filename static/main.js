@@ -11,6 +11,7 @@ var photoImg = new Image();
 var flipHorz = false;
 var flipVert = false;
 var modalOn = false;
+var groupName = '';
 
 
 function render() {
@@ -110,7 +111,7 @@ function loadNextPhoto( next, deleted ) {
 	if ( next !== undefined ) {
 		nextIndex = photoIndex + ( next ? 1 : -1 );
 	}
-	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotationChange: rotationChange, deleted: deleted } }, function( data ) {
+	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotationChange: rotationChange, deleted: deleted, group: groupName } }, function( data ) {
 		setPhotoData( data );
 		setFilename( data );
 		photoIndex = nextIndex;
@@ -207,6 +208,39 @@ function doCommitConfirmation() {
 }
 
 
+function selectSelectableElement( selectableContainer, elementsToSelect ) {
+	$(".ui-selected", selectableContainer).not(elementsToSelect).removeClass("ui-selected");
+	$(elementsToSelect).addClass("ui-selected");
+	selectableContainer.selectable( "refresh" );
+}
+
+
+function doGroupDialog() {
+	modalOn = true;
+	
+	var select = $( "#dialog-group-select" );
+	selectSelectableElement( select, $('#dialog-group-select li:first') );
+	
+	$( "#dialog-group" ).dialog({
+		resizable: true,
+		height: 200,
+		modal: true,
+		close: function( event, ui ) {
+			modalOn = false;
+		},
+		buttons: {
+			"Assign": function() {
+				groupName = 'newgroup';
+				$( this ).dialog( "close" );
+			},
+			Cancel: function() {
+				$( this ).dialog( "close" );
+			}
+		}
+	});	
+}
+
+
 function onKeyPress( evt ) {
 	console.log( evt.which );
 	$( "#lastkeypress" ).text( evt.which.toString() );
@@ -232,6 +266,9 @@ function onKeyPress( evt ) {
 			case 67: // C
 				doCommitConfirmation();
 				break;
+			case 32: // space
+				doGroupDialog();
+				break;
 		}
 	}
 	return true;
@@ -244,5 +281,8 @@ window.onload = function() {
 	win.keydown( onKeyPress );
 	loadNextPhoto();
 	setBodyHeight();
+	
+	var select = $( "#dialog-group-select" );
+	select.selectable();
 };
 
