@@ -67,6 +67,11 @@ body, html {
 	text-align: center;
 }
 
+#dialog-new-group-name
+{
+	display: none;
+}
+
 #dialog-group
 {
 	display: none;

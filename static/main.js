@@ -1,5 +1,6 @@
 'use strict';
 
+var isPs4 = false;
 var viewport = $( "#viewport" );
 var viewimg = $( "#canvas" );
 var filenameDiv = $( "#filename" );
@@ -14,6 +15,26 @@ var modalOn = false;
 var allGroupNames = [];
 var groupName = '';
 var selectedGroupId = '';
+
+
+var normalKeys = {
+	'37': 'prev', // left
+	'39': 'next', // right
+	'13': 'next', // enter
+	'40': 'rotatedown', // down
+	'38': 'rotateup', // up
+	'46': 'delete', // delete
+	'67': 'commit', // C
+	'32': 'group' // space
+};
+var ps4Keys = {
+	'37': 'prev', // left
+	'39': 'next', // right
+	'40': 'rotatedown', // down
+	'38': 'group', // up
+	'116': 'commit', // L1
+	'117': 'delete' // L2
+};
 
 
 function render() {
@@ -355,39 +376,39 @@ function onKeyPress( evt ) {
 	//$( "#lastkeypress" ).text( evt.which.toString() );
 	var pressed = false;
 	if ( !modalOn ) {
-		// key presses only allowed when a modal dialog is not displayed
-		switch ( evt.which ) {
-			case 37: // left
-				loadNextPhoto( false );
-				pressed = true;
+		var keys = isPs4 ? ps4Keys : normalKeys;
+		if ( keys.hasOwnProperty( evt.which ) ) {
+			var command = keys[ evt.which ];
+			switch ( command ) {
+				case 'prev':
+					loadNextPhoto( false );
+					pressed = true;
 				break;
-			case 13: // enter
-			case 39: // right
-				loadNextPhoto( true );
-				pressed = true;
+				case 'next':
+					loadNextPhoto( true );
+					pressed = true;
 				break;
-			case 40: // down
-				rotate( true );
-				pressed = true;
+				case 'rotateup':
+					rotate( true );
+					pressed = true;
 				break;
-			case 38: // up
-				rotate( false );
-				pressed = true;
+				case 'rotatedown':
+					rotate( false );
+					pressed = true;
 				break;
-			case 46: // delete
-				deletePicture();
-				pressed = true;
+				case 'delete':
+					deletePicture();
+					pressed = true;
 				break;
-			case 67: // C
-			case 116: // L1
-				doCommitConfirmation();
-				pressed = true;
+				case 'commit':
+					doCommitConfirmation();
+					pressed = true;
 				break;
-			case 117: // L2
-			case 32: // space
-				doGroupDialog();
-				pressed = true;
+				case 'group':
+					doGroupDialog();
+					pressed = true;
 				break;
+			}
 		}
 	}
 	if ( pressed ) {
@@ -398,6 +419,10 @@ function onKeyPress( evt ) {
 
 
 window.onload = function() {
+	var ua = navigator.userAgent;
+	if ( ua.match( /PlayStation 4/ ) ) {
+		isPs4 = true;
+	}
 	var win = $(window);
 	win.bind('resize', setBodyHeight);
 	win.keydown( onKeyPress );
