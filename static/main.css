@@ -28,6 +28,8 @@ body, html {
 	position: relative;
 	background-color: #FFFFFF;
 	width: auto;
+	font-size: 250%;
+	text-align: center;
 }
 
 #viewport
@@ -61,23 +63,14 @@ body, html {
 	position: relative;
 	background-color: #FFFFFF;
 	width: auto;
-	font-size: 200%;
+	font-size: 250%;
+	text-align: center;
 }
 
 #dialog-group
 {
 	display: none;
 }
-
-#dialog-group-select .ui-selecting { background: #FECA40; }
-#dialog-group-select .ui-selected { background: #F39814; color: white; }
-#dialog-group-select
-{
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
-}
-#dialog-group-select li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
 
 
 .dialog-group-select-text-class

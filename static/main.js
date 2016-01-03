@@ -83,7 +83,7 @@ function setPhotoData( data ) {
 
 
 function setFilename( data ) {
-	filenameDiv[0].innerHTML = data.imageMeta.path;
+	filenameDiv[0].innerHTML = data.imageMeta.path.substr( data.rootPath.length + 1 );
 }
 
 
