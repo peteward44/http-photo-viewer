@@ -11,6 +11,7 @@ var photoImg = new Image();
 var flipHorz = false;
 var flipVert = false;
 var modalOn = false;
+var allGroupNames = [];
 var groupName = '';
 
 
@@ -42,6 +43,7 @@ function setPhotoData( data ) {
 	photoImg.onload = function() {
 		rotation = data.imageMeta.rotation;
 		rotationChange = 0;
+		groupName = '';
 		flipHorz = false;
 		flipVert = false;
 		switch ( data.image.orientation ) {
@@ -219,7 +221,19 @@ function doGroupDialog() {
 	modalOn = true;
 	
 	var select = $( "#dialog-group-select" );
-	selectSelectableElement( select, $('#dialog-group-select li:first') );
+	var html = '';
+	// add each group name, along with a 'new' and 'remove' option
+	for ( var i=0; i<allGroupNames.length; ++i ) {
+		var g = allGroupNames[i];
+		html += '<li class="ui-widget-content" value="' + g + '">' + g + '</li>';
+	}
+	//html += '<li class="ui-widget-content" value="new">New...</li>';
+	//html += '<li class="ui-widget-content" value="remove">Remove</li>';
+	
+	select[0].innerHTML = html;
+	if ( allGroupNames.length > 0 ) {
+		selectSelectableElement( select, $('#dialog-group-select li:first') );
+	}
 	
 	$( "#dialog-group" ).dialog({
 		resizable: true,
@@ -230,7 +244,15 @@ function doGroupDialog() {
 		},
 		buttons: {
 			"Assign": function() {
-				groupName = 'newgroup';
+				var newName = $( "#dialog-group-newText" ).val();
+				if ( newName.length > 0 ) {
+					groupName = newName;
+					allGroupNames.push( newName );
+				} else {
+					groupName = select.val();
+				}
+				// TODO: better validation
+				groupName = groupName.trim();
 				$( this ).dialog( "close" );
 			},
 			Cancel: function() {
