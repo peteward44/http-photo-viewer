@@ -220,8 +220,8 @@ function selectSelectableElement( selectableContainer, elementsToSelect ) {
 }
 
 
-function addGroupButton( id, text ) {
-	return '<input type="checkbox" id="' + id + '" name="dialog-group-select-button" class="dialog-group-select-class"><label for="' + id + '" class="dialog-group-select-text-class">' + text + '</label><br/>';
+function addGroupButton( index, id, text ) {
+	return '<input type="checkbox" id="' + id + '" name="dialog-group-select-button" class="dialog-group-select-class"><label tabindex="' + index + '" for="' + id + '" class="dialog-group-select-text-class">' + text + '</label><br/>';
 }
 
 
@@ -257,6 +257,26 @@ function showNewGroupNameDialog() {
 }
 
 
+function onGroupKeyPress( evt ) {
+	var pressed = false;
+	if ( !modalOn ) {
+		// key presses only allowed when a modal dialog is not displayed
+		switch ( evt.which ) {
+			case 40: // down
+				pressed = true;
+				break;
+			case 38: // up
+				pressed = true;
+				break;
+		}
+	}
+	if ( pressed ) {
+//		evt.preventDefault();
+	}
+	return true;
+}
+
+
 function doGroupDialog() {
 	modalOn = true;
 	
@@ -266,11 +286,11 @@ function doGroupDialog() {
 	for ( var i=0; i<allGroupNames.length; ++i ) {
 		var g = allGroupNames[i];
 		var name = i.toString();
-		html += addGroupButton( name, g );
+		html += addGroupButton( i, name, g );
 	}
 	
-	html += addGroupButton( 'new', 'New Group...' );
-	html += addGroupButton( 'remove', 'Remove' );
+	html += addGroupButton( i++, 'new', 'New Group...' );
+	html += addGroupButton( i++, 'remove', 'Remove' );
 	
 	select[0].innerHTML = html;
 		
@@ -295,7 +315,11 @@ function doGroupDialog() {
 		resizable: true,
 		height: 200,
 		modal: true,
+		open: function( event, ui ) {
+			$(window).on( 'keyDown', onGroupKeyPress );
+		},
 		close: function( event, ui ) {
+			$(window).off( 'keyDown', onGroupKeyPress );
 			if ( !triggeredNewDialog ) {
 				modalOn = false;
 			}
