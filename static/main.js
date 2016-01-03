@@ -14,6 +14,7 @@ var flipVert = false;
 var modalOn = false;
 var allGroupNames = [];
 var groupName = '';
+var dateTime = null;
 var selectedGroupId = '';
 
 
@@ -104,7 +105,11 @@ function setPhotoData( data ) {
 
 
 function setFilename( data ) {
-	filenameDiv[0].innerHTML = data.imageMeta.path.substr( data.rootPath.length + 1 );
+	var dt = null;
+	if ( data.image.dateTime ) {
+		dt = data.image.dateTime.toString();
+	}
+	filenameDiv[0].innerHTML = data.imageMeta.path.substr( data.rootPath.length + 1 ) + ( dt ? ( "   ---   " + dt ) : '' );
 }
 
 
