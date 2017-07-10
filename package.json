@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-	"start": "node index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
@@ -16,13 +16,10 @@
     "babel": "^5.8.29",
     "express": "^4.13.3",
     "fs-extra": "^0.26.2",
-    "jimp": "^0.2.9",
-    "node-uuid": "^1.4.7",
     "piexifjs": "^1.0.0",
+    "sharp": "^0.18.2",
+    "uuid": "*",
     "walk-sync": "^0.2.5",
     "yargs": "^3.31.0"
-  },
-  "optionalDependencies": {
-    "sharp": "^0.11.3"
   }
 }
