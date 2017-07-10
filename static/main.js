@@ -4,10 +4,12 @@ var isPs4 = false;
 var viewport = $( "#viewport" );
 var viewimg = $( "#canvas" );
 var filenameDiv = $( "#filename" );
+var deletedImg = $( "#deleted-image" )[0];
 var canvas = viewimg[0];
 var photoIndex = 0;
 var rotation = 0;
 var rotationChange = 0;
+var isDeleted = false;
 var photoImg = new Image();
 var flipHorz = false;
 var flipVert = false;
@@ -34,6 +36,10 @@ var ps4Keys = {
 	'117': 'delete' // L2
 };
 
+
+function showDeletedGraphic( show ) {
+	deletedImg.style.display = show ? "block" : "none";
+}
 
 function render() {
 	while ( rotation < 0 ) {
@@ -96,17 +102,24 @@ function setPhotoData( data ) {
 		}
 		render();
 		hideLoadingDialog();
+		isDeleted = !!data.imageMeta.deleted;
+		showDeletedGraphic( isDeleted );
 	};
 	photoImg.src = data.image.src;
 }
 
 
 function setFilename( data ) {
+	var result = data.imageMeta.path.substr( data.rootPath.length + 1 );
 	var dt = null;
 	if ( data.image.dateTime ) {
 		dt = data.image.dateTime.toString();
 	}
-	filenameDiv[0].innerHTML = data.imageMeta.path.substr( data.rootPath.length + 1 ) + ( dt ? ( "   ---   " + dt ) : '' );
+	if ( dt ) {
+		result += "   ---   " + dt;
+	}
+	result += "   ---   [" + ( data.imageIndex + 1 ) + "/" + data.imageTotal + "]";
+	filenameDiv[0].innerHTML = result;
 }
 
 
@@ -127,19 +140,21 @@ function showLoadingDialog() {
 	} );
 }
 
-
 function hideLoadingDialog() {
 	$( "#dialog-loading" ).dialog( "close" );
 }
 
 
-function loadNextPhoto( next, deleted ) {
+function loadNextPhoto( next ) {
 	var previousPhotoData;
 	var nextIndex = 0;
 	if ( next !== undefined ) {
 		nextIndex = photoIndex + ( next ? 1 : -1 );
 	}
-	$.getJSON( '/next', { next: { index: nextIndex }, previous: { index: photoIndex, rotationChange: rotationChange, deleted: deleted, group: groupName } }, function( data ) {
+	var previous = { index: photoIndex, rotationChange: rotationChange, deleted: isDeleted, group: groupName };
+	console.log( "Sending", JSON.stringify( previous, null, 2 ) );
+	$.getJSON( '/next', { next: { index: nextIndex }, previous: previous }, function( data ) {
+		console.log( "Received", JSON.stringify( data, null, 2 ) );
 		setPhotoData( data );
 		setFilename( data );
 		photoIndex = nextIndex;
@@ -185,24 +200,32 @@ function rotate( clockwise ) {
 
 
 function deletePicture() {
-	modalOn = true;
-	$( "#dialog-confirm" ).dialog({
-		resizable: false,
-		height: 200,
-		modal: true,
-		close: function( event, ui ) {
-			modalOn = false;
-		},
-		buttons: {
-			"Delete picture": function() {
-				loadNextPhoto( true, true );
-				$( this ).dialog( "close" );
-			},
-			Cancel: function() {
-				$( this ).dialog( "close" );
-			}
-		}
-	});
+	// show red cross on image then move to next photo automatically
+	isDeleted = !isDeleted;
+	showDeletedGraphic( isDeleted );
+	if ( isDeleted ) {
+		setTimeout( function() {
+			loadNextPhoto( true );
+		}, 200 );
+	}
+	// modalOn = true;
+	// $( "#dialog-confirm" ).dialog({
+		// resizable: false,
+		// height: 200,
+		// modal: true,
+		// close: function( event, ui ) {
+			// modalOn = false;
+		// },
+		// buttons: {
+			// "Delete picture": function() {
+				// loadNextPhoto( true, true );
+				// $( this ).dialog( "close" );
+			// },
+			// Cancel: function() {
+				// $( this ).dialog( "close" );
+			// }
+		// }
+	// });
 }
 
 
